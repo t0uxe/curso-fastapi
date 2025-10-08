@@ -3,8 +3,7 @@
 # Plain: similar a before, termina al retornar el valor
 # Wrap: flexible antes o despues de las validaciones de pydantic
 
-from fastapi import FastAPI
-from pydantic import AfterValidator, BaseModel
+from pydantic import AfterValidator, BaseModel, field_validator
 from typing import Annotated
 
 
@@ -34,5 +33,25 @@ class Model3(BaseModel):
 # ejemplo2: Model2 = Model2(other_number=4)
 # print(ejemplo2)
 
-ejemplo3: Model3 = Model3(lista_pares=[2, 5, 10])
-print(ejemplo3)
+# ejemplo3: Model3 = Model3(lista_pares=[2, 5, 10])
+# print(ejemplo3)
+
+
+# =================== DECORATOR ===================
+
+
+class Item(BaseModel):
+    item_id: int
+    price: float
+
+    @field_validator(
+        "item_id", "price", mode="after"
+    )  # mode="before" tambien se puede poner
+    def check_positive(cls, value: int | float):
+        """Hace la comprobación del valor al crear la instancia del objeto"""
+        if value < 0:
+            raise ValueError("Item ID debe ser positivo.")
+        return value
+
+
+banana: Item = Item(item_id=2, price=2.7)
