@@ -38,8 +38,6 @@ class Model3(BaseModel):
 
 
 # =================== DECORATOR ===================
-
-
 class Item(BaseModel):
     item_id: int
     price: float
