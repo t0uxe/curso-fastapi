@@ -11,6 +11,12 @@ app = FastAPI()
 # min_length
 # pattern
 
+# METADATA
+# title
+# description
+# alias
+# deprecated
+
 
 def check_valid_id(id: str):
     if id % 2 != 0:
@@ -18,33 +24,32 @@ def check_valid_id(id: str):
     return id
 
 
-# Mira que el valor sea mayor que 3
-# @app.get("/items/")
-# async def read_items(
-#     q: Annotated[int | None, Query(gt=3)] = None,
-# ):
-#     results: dict = {"mensaje": "Acceso a get(read_items)"}
-#     if q:
-#         results.update({"q": q})
-#     return results
-
 # Validacion para un valor mayor que X
-# @app.get("/items/")
-# async def read_items(
-#     q: Annotated[int | None, Query(gt=3)] = None,
-# ):
-#     results: dict = {"mensaje": "Acceso a get(read_items)"}
-#     if q:
-#         results.update({"q": q})
-#     return results
-
-
-# Validacion personalizada
 @app.get("/items/")
 async def read_items(
-    q: Annotated[int | None, AfterValidator(check_valid_id)] = None,
+    q: Annotated[
+        int | None,
+        Query(
+            gt=3,
+            title="Query",
+            description="Lo que se va a buscar",
+            alias="item-query",
+            deprecated=True,
+        ),  # Añadida metadata a Query
+    ] = None,
 ):
     results: dict = {"mensaje": "Acceso a get(read_items)"}
     if q:
         results.update({"q": q})
     return results
+
+
+# # Validacion personalizada
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[int | None, AfterValidator(check_valid_id)] = None,
+# ):
+#     results: dict = {"mensaje": "Acceso a get(read_items)"}
+#     if q:
+#         results.update({"q": q})
+#     return results
