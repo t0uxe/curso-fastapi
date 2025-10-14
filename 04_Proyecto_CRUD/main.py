@@ -1,21 +1,6 @@
-from fastapi import FastAPI
-from pydantic import BaseModel, Field, Literal
-from typing import Annotated
-
-
-app = FastAPI()
-
-
-# class Tarea(BaseModel):
-#     id: Annotated[int, Field(gt=0)]
-#     titulo: Annotated[str, Field(ge=3)]
-#     estado: []
-
-
-class Tarea(BaseModel):
-    item_id: Annotated[float, Field(gt=0)]
-    titulo: Annotated[str, Field(min_length=3)]
-    estado: Literal["pendiente", "completado"] = "pendiente"
+from fastapi import FastAPI, Query
+from pydantic import BaseModel, Field
+from typing import Annotated, Literal
 
 
 fake_db: list[Tarea] = [
@@ -30,3 +15,29 @@ fake_db: list[Tarea] = [
     Tarea(id=9, titulo="Revisar correo", estado="pendiente"),
     Tarea(id=10, titulo="Lavar carro", estado="pendiente"),
 ]
+
+
+class Tarea(BaseModel):
+    id: Annotated[float, Field(gt=0)]
+    titulo: Annotated[str, Field(min_length=3)]
+    estado: Literal["pendiente", "completado"] = "pendiente"
+
+
+class FilterParams(BaseModel):
+    limit: Annotated[int, Field(ge=1)] = 5
+    offset: Annotated[int, Field(ge=0)] = 0
+    estado: Literal["pendiente", "completado"] | None = None
+
+
+app = FastAPI()
+
+
+@app.get("/tareas/")
+async def get_tareas(filter: Annotated[FilterParams, Query()]):
+    tareas_filtradas = (
+        [tarea for tarea in fake_db if tarea.estado == filter.estado]
+        if filter.estado
+        else fake_db
+    )
+
+    return tareas_filtradas[filter.offset : filter.offset + filter.limit]
