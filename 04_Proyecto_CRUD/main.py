@@ -27,17 +27,25 @@ class FilterParams(BaseModel):
     limit: Annotated[int, Field(ge=1)] = 5
     offset: Annotated[int, Field(ge=0)] = 0
     estado: Literal["pendiente", "completado"] | None = None
+    search: Annotated[str, Field()] | None = None
 
 
 app = FastAPI()
 
 
-@app.get("/tareas/")
-async def get_tareas(filter: Annotated[FilterParams, Query()]):
+@app.get("/tareas/", response_model=list[Tarea])
+async def get_tareas(filter: Annotated[FilterParams, Query()]) -> list[Tarea]:
     tareas_filtradas = (
         [tarea for tarea in fake_db if tarea.estado == filter.estado]
         if filter.estado
         else fake_db
     )
+
+    if filter.search:
+        tareas_filtradas = [
+            tarea
+            for tarea in tareas_filtradas
+            if filter.search.lower() in tarea.titulo.lower()
+        ]
 
     return tareas_filtradas[filter.offset : filter.offset + filter.limit]
