@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Query, HTTPException
-from pydantic import BaseModel, Field, Path
+from fastapi import FastAPI, Query, HTTPException, Path
+from pydantic import BaseModel, Field
 from typing import Annotated, Literal
 from itertools import count
 
-id_generator = count(start=1)
+id_generator: int = count(start=1)
 
 
 def obtener_nuevo_id() -> int:
@@ -15,12 +15,17 @@ class TareaBase(BaseModel):
     estado: Literal["pendiente", "completado"] = "pendiente"
 
 
+class TareaUpdate(BaseModel):
+    titulo: Annotated[str, Field(min_length=3)]
+    estado: Literal["pendiente", "completado"]
+
+
 class TareaCreate(TareaBase):
     pass
 
 
 class Tarea(TareaBase):
-    id: Annotated[float, Field(gt=0)]
+    id: Annotated[int, Field(gt=0)]
 
 
 class FilterParams(BaseModel):
@@ -79,3 +84,15 @@ async def create_tarea(tarea: TareaCreate):
     nueva_tarea: Tarea = Tarea(id=nuevo_id, **tarea.model_dump())
     fake_db.append(nueva_tarea)
     return nueva_tarea
+
+
+@app.put("/tareas/{id}", response_model=Tarea)
+async def actualizar_tarea(id: Annotated[int, Path(gt=0)], tarea_update: TareaUpdate):
+    for i, tarea in enumerate(fake_db):
+        if tarea.id == id:
+            tarea_actualizada = tarea.model_copy(update=tarea_update.model_dump())
+            fake_db[i] = tarea_actualizada
+            return tarea_actualizada
+    raise HTTPException(
+        status_code=404, detail=f"No se ha encontrado la tarea con el ID {id}."
+    )
