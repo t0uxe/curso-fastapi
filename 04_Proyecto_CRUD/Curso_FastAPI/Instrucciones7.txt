@@ -1,0 +1,3 @@
+# Eliminar tarea
+# Crea el endpoint para delete "/tareas/{id}", utiliza el status_code 204 (No content)
+# busca la tarea por su id y eliminala. Si no existe al igual que Put usa HTTPException 404

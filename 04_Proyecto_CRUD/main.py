@@ -96,3 +96,12 @@ async def actualizar_tarea(id: Annotated[int, Path(gt=0)], tarea_update: TareaUp
     raise HTTPException(
         status_code=404, detail=f"No se ha encontrado la tarea con el ID {id}."
     )
+
+
+@app.delete("/tareas/{id}", status_code=204)
+async def borrar_tarea(id: Annotated[int, Path(gt=0)]):
+    for i, tarea in enumerate(fake_db):
+        if tarea.id == id:
+            del fake_db[i]
+            return
+    raise HTTPException(status_code=404, detail=f"No existe la tarea con ID {id}.")
