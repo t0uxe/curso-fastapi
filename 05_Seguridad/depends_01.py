@@ -31,7 +31,7 @@ def get_logger():
 
 # FastAPI recomienda poner el Annotated aquí dentro de una variable y poner el tipo más limpio
 # de esta manera en la función, en lugar de poner en la cabecera de la función el Annotated entero.
-logger_dependency = Anncd otated[Logger, Depends(get_logger)]
+logger_dependency = Annotated[Logger, Depends(get_logger)]
 
 
 @app.get("/items/{message}")
